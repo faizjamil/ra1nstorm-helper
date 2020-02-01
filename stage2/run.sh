@@ -11,7 +11,21 @@ if [ "$ID" != 0 ]; then
 	exec su -c $0
 fi
 echo "Checking if zenity and gawk are installed..."
-which gawk 2>&1 >/dev/null || apt install -y gawk
-which zenity 2>&1 >/dev/null || apt install -y zenity
+# TODO: debug below code
+if [ apt-get update ]; then
+        echo "apt detected, packages updated"
+       	which gawk 2>&1 >/dev/null || apt install -y gawk
+        which zenity 2>&1 >/dev/null || apt install -y zenity
+elif [ pacman -Syu ] ; then
+        echo "pacman detected, packages updated"
+	which gawk 2>&1 >/dev/null || pacman -Syu  --noconfirm gawk
+        which zenity 2>&1 >/dev/null || pacman -Syu --noconfirm zenity
+else
+        echo "yum detected, updating packages"
+        yum update -y
+	which gawk 2>&1 >/dev/null || yum install  -y gawk
+        which zenity 2>&1 >/dev/null || yum install -y zenity
+fi
+
 echo "Launching setup..."
 gawk -f main.awk 2>&1 | tee -a /tmp/ra1nstorm.log
